@@ -2,6 +2,8 @@ package io.saeid.compiler
 
 import io.saeid.compiler.Logger.log
 import io.saeid.compiler.SymbolType.ANY
+import io.saeid.compiler.SymbolType.DIGIT
+import io.saeid.compiler.SymbolType.ID
 import java.util.function.Function
 
 object ReservedTable {
@@ -60,10 +62,11 @@ internal class Tokenizer(
     private var cursor = 0
     private val tokens = mutableListOf<Symbol>()
     private var reachEOF = false
+    private var detectedSymbolType = ANY
 
     override fun apply(input: String): List<Symbol> {
         begin = 0
-        end = 2
+        end = 1
         cursor = 0
         tokens.clear()
         while (cursor.notReachEOF(input)) {
@@ -90,7 +93,7 @@ internal class Tokenizer(
         val symbol = if (symbolTable.containsKey(token)) {
             symbolTable[token]!!
         } else {
-            val symbol = Symbol(token)
+            val symbol = Symbol(name = token, type = detectedSymbolType)
             symbolTable[token] = symbol
             symbol
         }
@@ -119,6 +122,7 @@ internal class Tokenizer(
         checkInvalidIdentifier(token)
         when {
             token.isDigit() -> {
+                detectedSymbolType = DIGIT
                 log("$token is digit")
                 incrementEnd(input)
                 return true
@@ -129,6 +133,7 @@ internal class Tokenizer(
                 return true
             }
             token.isAlphabetDigitAlphabet() -> {
+                detectedSymbolType = ID
                 log("$token is alphabet")
                 incrementEnd(input)
                 return true
@@ -175,5 +180,5 @@ private fun String.hasInvalidIdentifier(): Boolean {
 data class Symbol(val name: String, val type: SymbolType = ANY, val scope: Int = -1)
 
 enum class SymbolType {
-    DIG, ID, ANY
+    DIGIT, ID, ANY
 }

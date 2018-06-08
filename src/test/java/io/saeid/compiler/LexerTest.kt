@@ -1,5 +1,9 @@
 package io.saeid.compiler
 
+import io.saeid.compiler.SymbolType.ANY
+import io.saeid.compiler.SymbolType.DIGIT
+import io.saeid.compiler.SymbolType.ID
+import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 /**
@@ -61,18 +65,32 @@ class LexerTest {
     }
 
     @Test
-    fun `foo bar`() {
-        Lexer("int a=2;").tokenize().forEach {
-            println(it)
+    fun `validate tokenizer`() {
+        var result: List<Symbol>
+
+        result = scan("int a=2;")
+        result.assert("int", "a", "=", "2", ";")
+        result.assert(ANY, ID, ANY, DIGIT, ANY)
+        result = scan("a=2;")
+        result.assert( "a", "=", "2", ";")
+        result.assert(ID, ANY, DIGIT, ANY)
+        result = scan("int a = a2 + 2")
+        result.assert("int", "a", "=", "a2", "+","2")
+        result.assert(ANY, ID, ANY, ID, ANY,DIGIT)
+    }
+
+    private fun List<Symbol>.assert(vararg tokens: String) {
+        assertEquals(size, tokens.size)
+        forEachIndexed { index, symbol ->
+            assertEquals(symbol.name, tokens[index])
         }
-        Lexer("a=2;").tokenize().forEach {
-            println(it)
-        }
-        Lexer("int foo(){ int a = 2; }").tokenize().forEach {
-            println(it)
-        }
-        Lexer("int a = a2 + 2").tokenize().forEach {
-            println(it)
+    }
+
+    private fun List<Symbol>.assert(vararg symbolType: SymbolType) {
+        assertEquals(size, symbolType.size)
+        forEachIndexed { index, symbol ->
+            println(symbol)
+            assertEquals(symbol.type, symbolType[index])
         }
     }
 }
