@@ -176,9 +176,3 @@ private fun String.hasCommentSyntaxError(): Boolean {
 private fun String.hasInvalidIdentifier(): Boolean {
     return "^[0-9]+[a-zA-Z]+".toRegex().containsMatchIn(this)
 }
-
-data class Symbol(val name: String, val type: SymbolType = ANY, val scope: Int = -1)
-
-enum class SymbolType {
-    DIGIT, ID, ANY
-}
