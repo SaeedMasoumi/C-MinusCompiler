@@ -1,5 +1,10 @@
 package io.saeid.compiler
 
+import io.saeid.compiler.Logger.log
+import io.saeid.compiler.Parser.Action.ACCEPT
+import io.saeid.compiler.Parser.Action.ERROR
+import io.saeid.compiler.Parser.Action.REDUCE
+import io.saeid.compiler.Parser.Action.SHIFT
 import io.saeid.compiler.SymbolType.ANY
 
 /**
@@ -22,31 +27,12 @@ class Parser(rawTokens: List<Symbol>,
     }
 
     fun parse() {
+        log("Start parsing........")
         tokens.forEach {
-            val token = it.name
-            when {
-                accept(token) -> {
-                    Logger.log("accept")
-                }
-                shift(token) -> {
-                    val number = take(token).substring(1)
-                    stack.add(token)
-                    stack.add(number)
-                }
-                reduce(token) -> {
-                    val grammarNumber = take(token).substring(1).toInt()
-                    val grammarLine = rules[grammarNumber - 1]
-                    var rhsSize = grammarLine.right.size * 2
-                    while (rhsSize > 0) {
-                        stack.removeAt(stack.size - 1)
-                        rhsSize--
-                    }
-                    stack.add(grammarLine.left)
-                    //goto
-                    val top = stack.last() //top
-                    val index = stack[stack.size - 2].toInt() // top-1
-                    stack.add(table.take(index, top))
-                }
+            when (action(it)) {
+                ACCEPT -> accept(it)
+                SHIFT -> shift(it)
+                REDUCE -> reduce(it)
                 else -> {
                     throw ParserException("")
                 }
@@ -54,18 +40,58 @@ class Parser(rawTokens: List<Symbol>,
         }
     }
 
-
-    private fun take(token: String): String {
-        val last = stack.last()
-        val index = last.toInt()
-        return table.take(index, token)
+    private fun action(token: Symbol): Action {
+        log("lookup action for ${token.name}")
+        val cell = take(token)
+        log("cell found: $cell")
+        when {
+            cell == "acc" -> return ACCEPT
+            cell.startsWith("s") -> return SHIFT
+            cell.startsWith("r") -> return REDUCE
+        }
+        return ERROR
     }
 
-    private fun accept(token: String) = take(token) == "acc"
+    private enum class Action {
+        SHIFT, REDUCE, ACCEPT, ERROR
+    }
 
-    private fun shift(token: String) = take(token).startsWith("s")
+    private fun take(token: Symbol): String {
+        val last = stack.last()
+        val index = last.toDouble().toInt()
+        val column = token.typeToTableName()
+        return table.take(index, column)
+    }
 
-    private fun reduce(token: String) = take(token).startsWith("r")
+    private fun accept(token: Symbol) {
+
+    }
+
+    private fun shift(token: Symbol) {
+        val number = take(token).substring(1)
+        stack.add(token.typeToTableName())
+        stack.add(number)
+        log(">>>>>> Shift stack -> add ${token.typeToTableName()}, $number")
+        log("------ stack is $stack")
+    }
+
+    private fun reduce(token: Symbol) {
+        val grammarNumber = take(token).substring(1).toInt()
+        val grammarLine = rules[grammarNumber - 1]
+        var rhsSize = grammarLine.right.size * 2
+        while (rhsSize > 0) {
+            stack.removeAt(stack.size - 1)
+            rhsSize--
+        }
+        stack.add(grammarLine.left)
+        //goto
+        val top = stack.last() //top
+        val index = stack[stack.size - 2].toInt() // top-1
+        log("reduce goto $index $top")
+        stack.add(table.take(index, top))
+        log(">>>>>> Reduce")
+        log("------ stack is $stack")
+    }
 
     private fun Table.take(index: Int, token: String): String {
         return get(index)!![token]!!

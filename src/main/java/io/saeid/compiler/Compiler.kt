@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
     val lexer = Lexer(normalize(program))
     val tokens = lexer.tokenize()
     val rules = SLRTable.rules()
-    val table = SLRTable.slr()
+    val table = SLRTable.slr("generated-excel.xlsx")
     val parser = Parser(tokens, table, rules)
     parser.parse()
 

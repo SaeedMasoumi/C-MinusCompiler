@@ -12,15 +12,15 @@ object SLRTable {
     private lateinit var rule: List<Rule>
     private lateinit var table: Table
 
-    fun rules(): List<Rule> {
+    fun rules(path: String = "grammar.txt"): List<Rule> {
         if (!::rule.isInitialized)
-            rule = extractRules(getRawRules())
+            rule = extractRules(getRawRules(path))
         return rule
     }
 
-    private fun getRawRules(): RawRules {
+    private fun getRawRules(path: String): RawRules {
         val rawRules = arrayListOf<List<String>>()
-        File("grammar.txt").forEachLine {
+        File(path).forEachLine {
             rawRules.add(it.trim().split(" "))
         }
         return rawRules
@@ -43,16 +43,16 @@ object SLRTable {
     /**
      * RowIndex -> [Terminal or NonTerminal] -> Value
      */
-    fun slr(): Table {
+    fun slr(path: String = "slr.xlsx"): Table {
         if (!::table.isInitialized) {
-            table = makeSLRTable()
+            table = makeSLRTable(path)
         }
         return table
     }
 
-    private fun makeSLRTable(): Map<Int, Map<String, String>> {
+    private fun makeSLRTable(path: String): Map<Int, Map<String, String>> {
         val table = mutableMapOf<Int, Map<String, String>>()
-        Excel.open("slr.xlsx").use { workbook ->
+        Excel.open(path).use { workbook ->
             val sheet = workbook.getSheetAt(0)
             val firstRow = sheet.getRow(0)
 

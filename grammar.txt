@@ -16,9 +16,9 @@ param -> type_specifier ID
 param -> type_specifier ID [ ]
 compound_stmt -> { local_declarations statement_list }
 local_declarations -> local_declarations var_declaration 
-local_declarations -> 
+local_declarations -> EPS
 statement_list -> statement_list statement 
-statement_list -> 
+statement_list -> EPS
 statement -> expression_stmt 
 statement -> compound_stmt 
 statement -> selection_stmt 
@@ -50,6 +50,6 @@ factor -> call
 factor -> NUM
 call -> ID ( args )
 args -> arg_list  
-args -> 
+args -> EPS
 arg_list -> arg_list , expression 
 arg_list -> expression

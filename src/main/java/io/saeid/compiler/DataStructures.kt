@@ -1,12 +1,26 @@
 package io.saeid.compiler
 
+import io.saeid.compiler.SymbolType.DIGIT
+import io.saeid.compiler.SymbolType.ID
 import io.saeid.compiler.SymbolType.RESERVED
 
 /**
  * @author Saeed Masoumi (s-masoumi@live.com)
  */
 
-data class Symbol(val name: String, val type: SymbolType = RESERVED, val scope: Int = -1)
+data class Symbol(val name: String, val type: SymbolType = RESERVED, val scope: Int = -1) {
+
+    fun typeToTableName(): String {
+        return when (type) {
+            DIGIT -> "NUM"
+            ID -> "ID"
+            else -> {
+                name
+            }
+        }
+
+    }
+}
 
 enum class SymbolType {
     DIGIT, ID, ANY, RESERVED
