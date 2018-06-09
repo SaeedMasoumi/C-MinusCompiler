@@ -9,3 +9,4 @@ class InvalidCharacterException(message: String) : RuntimeException(message)
 
 class InvalidIdentifierNameException(message: String) : RuntimeException(message)
 
+class ParserException(message: String) : RuntimeException(message)

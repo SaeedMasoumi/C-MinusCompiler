@@ -8,6 +8,8 @@ fun main(args: Array<String>) {
     val tokens = lexer.tokenize()
     val rules = SLRTable.rules()
     val table = SLRTable.slr()
+    val parser = Parser(tokens, table, rules)
+    parser.parse()
 
 }
 
