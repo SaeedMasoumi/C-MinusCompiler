@@ -9,5 +9,6 @@ fun normalize(input: String): String {
             .replace("\\n+".toRegex(), " ")
             .replace("\\s+".toRegex(), " ")
             .replace("\\/\\*(.*?)\\*\\/".toRegex(), "")
+            .trim()
 //            .replace("/\\*((.|\\s)*?)\\*/".toRegex(), "") for multiline comment
 }

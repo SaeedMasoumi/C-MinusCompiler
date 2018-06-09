@@ -4,6 +4,7 @@ import io.saeid.compiler.Logger.log
 import io.saeid.compiler.SymbolType.ANY
 import io.saeid.compiler.SymbolType.DIGIT
 import io.saeid.compiler.SymbolType.ID
+import io.saeid.compiler.SymbolType.RESERVED
 import java.util.function.Function
 
 object ReservedTable {
@@ -29,6 +30,7 @@ object ReservedTable {
         symbolTable["]"] = Symbol("]")
         symbolTable["{"] = Symbol("{")
         symbolTable["}"] = Symbol("}")
+        symbolTable["&&"] = Symbol("&&")
         symbolTable[","] = Symbol(",")
         symbolTable[";"] = Symbol(";")
         symbolTable["EOF"] = Symbol("EOF")
@@ -69,6 +71,7 @@ internal class Tokenizer(
         end = 1
         cursor = 0
         tokens.clear()
+        detectedSymbolType = ANY
         while (cursor.notReachEOF(input)) {
             log("Tokenizer Loop: begin=$begin, end=$end, cursor=$cursor")
             if (reachEOF) {
@@ -102,6 +105,7 @@ internal class Tokenizer(
         if (!reachEOF) {
             moveCursor(input)
         }
+        detectedSymbolType = ANY
     }
 
     private fun moveCursor(input: String) {
@@ -128,6 +132,7 @@ internal class Tokenizer(
                 return true
             }
             symbolTable.containsKey(token) -> {
+                detectedSymbolType = RESERVED
                 log("$token already exists in symbol table")
                 incrementEnd(input)
                 return true
@@ -139,8 +144,12 @@ internal class Tokenizer(
                 return true
             }
             else -> {
-                log("stop lookahead")
-                return false
+                if (detectedSymbolType != ANY) {
+                    log("stop lookahead")
+                    return false
+                }
+                incrementEnd(input)
+                return true
             }
         }
     }
@@ -153,6 +162,7 @@ internal class Tokenizer(
 
     private fun incrementEnd(input: String) {
         if (end + 1 > input.length) {
+            println("reach eof")
             reachEOF = true
         }
         end++
@@ -163,7 +173,7 @@ internal class Tokenizer(
     private fun Int.notReachEOF(input: String) = this < input.length
 }
 
-private fun String.isDigit() = this.matches("\\d".toRegex())
+private fun String.isDigit() = this.matches("\\d+".toRegex())
 private fun String.isAlphabetDigitAlphabet() = this.matches(
         "[a-zA-Z]+[0-9]*[a-zA-Z]*".toRegex())
 

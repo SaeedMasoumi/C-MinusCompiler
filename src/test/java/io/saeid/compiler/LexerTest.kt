@@ -1,8 +1,8 @@
 package io.saeid.compiler
 
-import io.saeid.compiler.SymbolType.ANY
 import io.saeid.compiler.SymbolType.DIGIT
 import io.saeid.compiler.SymbolType.ID
+import io.saeid.compiler.SymbolType.RESERVED
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
@@ -66,27 +66,37 @@ class LexerTest {
 
     @Test
     fun `validate tokenizer`() {
-        var result: List<Symbol>
+    scan("33;").assert("33",";")
+        scan("int a =2;")
+                .assert("int", "a", "=", "2", ";")
+                .assert(RESERVED, ID, RESERVED, DIGIT, RESERVED)
+        scan("a=2;")
+                .assert("a", "=", "2", ";")
+                .assert(ID, RESERVED, DIGIT, RESERVED)
+        scan("int a = a2 + 2")
+                .assert("int", "a", "=", "a2", "+", "2")
+                .assert(RESERVED, ID, RESERVED, ID, RESERVED, DIGIT)
+        scan("""
+               while( a==3 && a<b){
+          int c;
+          c=45;
+          output(c-b);
+      }""")
+                .assert("while","(","a","==","3","&&","a","<","b",")","{","int","c",";","c","=","45",";"
+                ,"output","(","c","-","b",")",";","}")
 
-        result = scan("int a=2;")
-        result.assert("int", "a", "=", "2", ";")
-        result.assert(ANY, ID, ANY, DIGIT, ANY)
-        result = scan("a=2;")
-        result.assert( "a", "=", "2", ";")
-        result.assert(ID, ANY, DIGIT, ANY)
-        result = scan("int a = a2 + 2")
-        result.assert("int", "a", "=", "a2", "+","2")
-        result.assert(ANY, ID, ANY, ID, ANY,DIGIT)
     }
 
-    private fun List<Symbol>.assert(vararg tokens: String) {
+
+    private fun List<Symbol>.assert(vararg tokens: String) = apply {
+        this.forEach { println(it.name) }
         assertEquals(size, tokens.size)
         forEachIndexed { index, symbol ->
             assertEquals(symbol.name, tokens[index])
         }
     }
 
-    private fun List<Symbol>.assert(vararg symbolType: SymbolType) {
+    private fun List<Symbol>.assert(vararg symbolType: SymbolType) = apply {
         assertEquals(size, symbolType.size)
         forEachIndexed { index, symbol ->
             println(symbol)

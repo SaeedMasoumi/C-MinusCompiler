@@ -45,7 +45,7 @@ addop -> -
 term -> term * factor 
 term -> factor
 factor -> ( expression ) 
-factor-> var
+factor -> var
 factor -> call 
 factor -> NUM
 call -> ID ( args )
