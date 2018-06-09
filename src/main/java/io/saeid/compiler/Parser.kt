@@ -15,6 +15,7 @@ class Parser(rawTokens: List<Symbol>,
 
     private val stack = mutableListOf<String>()
     private val tokens: List<Symbol>
+    private var cursor = 0
 
     init {
         val newTokens = mutableListOf<Symbol>()
@@ -28,13 +29,15 @@ class Parser(rawTokens: List<Symbol>,
 
     fun parse() {
         log("Start parsing........")
-        tokens.forEach {
-            when (action(it)) {
-                ACCEPT -> accept(it)
-                SHIFT -> shift(it)
-                REDUCE -> reduce(it)
-                else -> {
-                    throw ParserException("")
+        while (cursor < tokens.size) {
+            tokens[cursor].let {
+                when (action(it)) {
+                    ACCEPT -> accept(it)
+                    SHIFT -> shift(it)
+                    REDUCE -> reduce(it)
+                    else -> {
+                        throw ParserException("")
+                    }
                 }
             }
         }
@@ -64,8 +67,9 @@ class Parser(rawTokens: List<Symbol>,
     }
 
     private fun accept(token: Symbol) {
-
+        throw Exception("Accepted")
     }
+
 
     private fun shift(token: Symbol) {
         val number = take(token).substring(1)
@@ -73,21 +77,27 @@ class Parser(rawTokens: List<Symbol>,
         stack.add(number)
         log(">>>>>> Shift stack -> add ${token.typeToTableName()}, $number")
         log("------ stack is $stack")
+        cursor++
     }
 
     private fun reduce(token: Symbol) {
         val grammarNumber = take(token).substring(1).toInt()
         val grammarLine = rules[grammarNumber - 1]
-        var rhsSize = grammarLine.right.size * 2
-        while (rhsSize > 0) {
-            stack.removeAt(stack.size - 1)
-            rhsSize--
+        if (!grammarLine.right.contains("EPS")) {
+            var rhsSize = grammarLine.right.size * 2
+            while (rhsSize > 0) {
+                if (stack.size > 0) {
+                    stack.removeAt(stack.size - 1)
+                }
+                rhsSize--
+            }
         }
         stack.add(grammarLine.left)
         //goto
         val top = stack.last() //top
-        val index = stack[stack.size - 2].toInt() // top-1
+        val index = stack[stack.size - 2].toDouble().toInt() // top-1
         log("reduce goto $index $top")
+        println(table.take(index,top))
         stack.add(table.take(index, top))
         log(">>>>>> Reduce")
         log("------ stack is $stack")
