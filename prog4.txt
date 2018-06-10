@@ -1,0 +1,13 @@
+int assign(int a){
+  return a;
+}
+void main(void){
+    int a;
+    int b;
+    if(a < b){
+      #
+      b = assign(a);
+    }else {
+
+    }
+}EOF

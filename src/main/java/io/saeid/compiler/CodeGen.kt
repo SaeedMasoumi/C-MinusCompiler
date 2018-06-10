@@ -6,7 +6,6 @@ package io.saeid.compiler
 fun generate(reduces: List<Reduce>) {
     reduces.forEach { (rule, cur, prev, old) ->
             when(rule.left){
-
             }
     }
 }

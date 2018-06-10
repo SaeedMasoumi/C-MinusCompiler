@@ -10,13 +10,14 @@ import io.saeid.compiler.SymbolType.ANY
 /**
  * @author Saeed Masoumi (s-masoumi@live.com)
  */
-class Parser(private val rawTokens: List<Symbol>,
+class Parser(rawTokens: List<Symbol>,
         private val table: Table, private val rules: List<Rule>) {
 
     private val stack = mutableListOf<String>()
     private val tokens: List<Symbol>
     private var cursor = 0
     private val reduces = arrayListOf<Reduce>()
+
     init {
         val newTokens = mutableListOf<Symbol>()
         newTokens.addAll(rawTokens)
@@ -30,13 +31,14 @@ class Parser(private val rawTokens: List<Symbol>,
     fun parse(): List<Reduce> {
         log("Start parsing........")
         while (cursor < tokens.size) {
+            log("Stack: $stack")
             tokens[cursor].let {
                 when (action(it)) {
                     ACCEPT -> return reduces
                     SHIFT -> shift(it)
                     REDUCE -> reduce(it)
-                    else -> {
-                        throw ParserException("")
+                    ERROR->{
+                        handleError(it)
                     }
                 }
             }
@@ -44,10 +46,11 @@ class Parser(private val rawTokens: List<Symbol>,
         return arrayListOf()
     }
 
+    private fun handleError(token: Symbol) {
+    }
+
     private fun action(token: Symbol): Action {
-        log("lookup action for ${token.name}")
         val cell = take(token)
-        log("cell found: $cell")
         when {
             cell == "acc" -> return ACCEPT
             cell.startsWith("s") -> return SHIFT
@@ -71,8 +74,6 @@ class Parser(private val rawTokens: List<Symbol>,
         val number = take(token).substring(1)
         stack.add(token.typeToTableName())
         stack.add(number)
-        log(">>>>>> Shift stack -> add ${token.typeToTableName()}, $number")
-        log("------ stack is $stack")
         cursor++
     }
 
@@ -81,6 +82,7 @@ class Parser(private val rawTokens: List<Symbol>,
         val rule = rules[grammarNumber - 1]
         reduces.add(Reduce(rule, getFromRawToken(cursor), getFromRawToken(cursor - 1),
                 getFromRawToken(cursor - 2)))
+        //remove 2*size from stack
         if (!rule.right.contains("EPS")) {
             var rhsSize = rule.right.size * 2
             while (rhsSize > 0) {
@@ -94,10 +96,7 @@ class Parser(private val rawTokens: List<Symbol>,
         //goto
         val top = stack.last() //top
         val index = stack[stack.size - 2].toDouble().toInt() // top-1
-        log("reduce goto $index $top")
         stack.add(table.take(index, top))
-        log(">>>>>> Reduce at cursor $cursor")
-        log("------ stack is $stack")
     }
 
     private fun getFromRawToken(cursor: Int): Symbol {

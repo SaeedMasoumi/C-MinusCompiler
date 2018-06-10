@@ -7,6 +7,7 @@ import io.saeid.compiler.SymbolType.ID
 import io.saeid.compiler.SymbolType.RESERVED
 import java.io.File
 import java.util.function.Function
+import java.util.regex.Pattern
 
 object ReservedTable {
     fun reservedSymbols(lex: File): MutableMap<String, Symbol> {
@@ -24,9 +25,23 @@ class Lexer(lex: File, private var input: String) {
     private var tokens: List<Symbol> = emptyList()
 
     fun tokenize(): List<Symbol> {
+        checkInvalidCharacter(input)
         checkCommentSyntax(input)
         tokens = Tokenizer(symbolTable).apply(input)
         return tokens
+    }
+
+    private fun checkInvalidCharacter(input: String) {
+        val pattern = Pattern.compile(
+                "^(\\s|[a-zA-Z]|\\=|\\d|\\;|\\<|\\>|\\+|\\-|\\(|\\)|\\{|\\}|\\[|\\]|\\,)+")
+        val matcher = pattern.matcher(input)
+        while (matcher.find()) {
+            val group = matcher.group()
+            if (input != group) {
+                throw InvalidCharacterException(
+                        "Invalid token at ${input.substring(group.length, group.length + 2)}...")
+            }
+        }
     }
 
     private fun checkCommentSyntax(input: String) {

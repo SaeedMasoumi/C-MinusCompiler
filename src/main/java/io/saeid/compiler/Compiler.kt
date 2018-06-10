@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     val parser = Parser(tokens, table, rules)
     val reduces = parser.parse()
     reduces.forEach {
-    it.apply { println("${old.name} ${prev.name} ${cur.name}") }
+        it.apply { println("${old.name} ${prev.name} ${cur.name}") }
     }
 }
 
@@ -20,7 +20,6 @@ typealias Language = String
 
 fun Language.lex() = File("$this.lex")
 fun Language.grammar() = File("$this.grammar")
-
 fun Language.table() = File("$this.table")
 
 fun File.toProgramString(): String {
