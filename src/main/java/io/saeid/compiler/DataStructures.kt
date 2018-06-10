@@ -31,3 +31,5 @@ typealias RawRules = List<List<String>>
 typealias Table = Map<Int, Map<String, String>>
 
 data class Rule(val left: String, val right: List<String>)
+
+data class Reduce(val rule: Rule, val cur: Symbol, val prev: Symbol, val old: Symbol)
