@@ -95,7 +95,7 @@ internal class Tokenizer(
             symbolTable[token] = symbol
             symbol
         }
-        log("Token has been found $symbol")
+        log(">>>>>>>>>>>> Insert $symbol")
         tokens.add(symbol)
         if (!reachEOF) {
             moveCursor(input)

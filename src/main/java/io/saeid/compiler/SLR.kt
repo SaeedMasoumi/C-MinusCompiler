@@ -13,6 +13,9 @@ object SLRTable {
     fun rules(path: File): List<Rule> {
         if (!::rule.isInitialized)
             rule = extractRules(getRawRules(path))
+        rule.forEachIndexed {i,s->
+            println("[${i+1}] ${s.left}->${s.right}")
+        }
         return rule
     }
 

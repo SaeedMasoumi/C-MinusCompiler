@@ -3,7 +3,7 @@ package io.saeid.compiler
 import java.io.File
 
 fun main(args: Array<String>) {
-    val language = "data/g1"
+    val language = "data/n1"
     val program = File("prog3.txt").toProgramString()
     val lexer = Lexer(language.lex(), normalize(program))
     val tokens = lexer.tokenize()
