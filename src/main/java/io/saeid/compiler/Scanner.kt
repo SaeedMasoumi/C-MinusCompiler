@@ -5,42 +5,22 @@ import io.saeid.compiler.SymbolType.ANY
 import io.saeid.compiler.SymbolType.DIGIT
 import io.saeid.compiler.SymbolType.ID
 import io.saeid.compiler.SymbolType.RESERVED
+import java.io.File
 import java.util.function.Function
 
 object ReservedTable {
-    fun reservedSymbols(): MutableMap<String, Symbol> {
+    fun reservedSymbols(lex: File): MutableMap<String, Symbol> {
         val symbolTable = hashMapOf<String, Symbol>()
-
-        symbolTable["while"] = Symbol("while")
-        symbolTable["int"] = Symbol("int")
-        symbolTable["return"] = Symbol("return")
-        symbolTable["output"] = Symbol("output")
-        symbolTable["<"] = Symbol("<")
-        symbolTable["=="] = Symbol("==")
-        symbolTable["="] = Symbol("=")
-        symbolTable["if"] = Symbol("if")
-        symbolTable["else"] = Symbol("else")
-        symbolTable["void"] = Symbol("void")
-        symbolTable["+"] = Symbol("+")
-        symbolTable["-"] = Symbol("-")
-        symbolTable["*"] = Symbol("*")
-        symbolTable["("] = Symbol("(")
-        symbolTable[")"] = Symbol(")")
-        symbolTable["["] = Symbol("[")
-        symbolTable["]"] = Symbol("]")
-        symbolTable["{"] = Symbol("{")
-        symbolTable["}"] = Symbol("}")
-        symbolTable["&&"] = Symbol("&&")
-        symbolTable[","] = Symbol(",")
-        symbolTable[";"] = Symbol(";")
-        symbolTable["EOF"] = Symbol("EOF")
+        lex.forEachLine {
+            symbolTable[it] = Symbol(it)
+        }
         return symbolTable
     }
 }
 
-class Lexer(private var input: String) {
+class Lexer(lex: File, private var input: String) {
 
-    private val symbolTable = ReservedTable.reservedSymbols()
+    private val symbolTable = ReservedTable.reservedSymbols(lex)
     private var tokens: List<Symbol> = emptyList()
 
     fun tokenize(): List<Symbol> {

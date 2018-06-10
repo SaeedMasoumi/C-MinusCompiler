@@ -10,10 +10,12 @@ import org.junit.Test
  * @author Saeed Masoumi (s-masoumi@live.com)
  */
 
-class LexerTest {
+class ScannerTest {
+
+    var language: Language = "../../data/g1"
 
     fun scan(input: String): List<Symbol> {
-        return Lexer(normalize(input)).tokenize()
+        return Lexer(language.lex(), normalize(input)).tokenize()
     }
 
     @Test(expected = CommentException::class)

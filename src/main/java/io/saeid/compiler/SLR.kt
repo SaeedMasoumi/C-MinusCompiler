@@ -1,7 +1,5 @@
 package io.saeid.compiler
 
-import org.apache.poi.ss.usermodel.CellType.NUMERIC
-import org.apache.poi.ss.usermodel.CellType.STRING
 import java.io.File
 
 /**
@@ -12,16 +10,16 @@ object SLRTable {
     private lateinit var rule: List<Rule>
     private lateinit var table: Table
 
-    fun rules(path: String = "grammar.txt"): List<Rule> {
+    fun rules(path: File): List<Rule> {
         if (!::rule.isInitialized)
             rule = extractRules(getRawRules(path))
         return rule
     }
 
-    private fun getRawRules(path: String): RawRules {
+    private fun getRawRules(path: File): RawRules {
         val rawRules = arrayListOf<List<String>>()
-        File(path).forEachLine {
-            rawRules.add(it.trim().split(" "))
+        path.forEachLine {
+            rawRules.add(it.trim().split("\\s+".toRegex()))
         }
         return rawRules
     }
@@ -30,10 +28,15 @@ object SLRTable {
         val rules = arrayListOf<Rule>()
         rawRules.forEach {
             val left = it[0]
-            val right: List<String> = if (it.containsEPS()) {
-                emptyList()
-            } else {
-                it.subList(2, it.size)
+            val right = mutableListOf<String>()
+            for (i in 2 until it.size) {
+                val token = it[i]
+                if (token == "|") {
+                    rules.add(Rule(left, right))
+                    right.clear()
+                } else /*if(token != "EPS")*/ {
+                    right.add(token)
+                }
             }
             rules.add(Rule(left, right))
         }
@@ -43,50 +46,34 @@ object SLRTable {
     /**
      * RowIndex -> [Terminal or NonTerminal] -> Value
      */
-    fun slr(path: String = "slr.xlsx"): Table {
+    fun slr(path: File): Table {
         if (!::table.isInitialized) {
             table = makeSLRTable(path)
         }
         return table
     }
 
-    private fun makeSLRTable(path: String): Map<Int, Map<String, String>> {
-        val table = mutableMapOf<Int, Map<String, String>>()
-        Excel.open(path).use { workbook ->
-            val sheet = workbook.getSheetAt(0)
-            val firstRow = sheet.getRow(0)
-
-            sheet.forEachIndexed { rowIndex, row ->
-                val cells = hashMapOf<String, String>()
-                firstRow.forEach {
-                    if (it.columnIndex > 0) {
-                        cells[it.stringCellValue] = ""
-                    }
+    private fun makeSLRTable(path: File): Map<Int, Map<String, String>> {
+        val table = mutableMapOf<Int, MutableMap<String, String>>()
+        var line = 0
+        val tokens = arrayListOf<String>()
+        path.forEachLine {
+            if (line == 0) {
+                it.split("\\s+".toRegex()).forEach {
+                    tokens.add(it)
                 }
-                if (rowIndex > 0) {
-                    row.forEach { cell ->
-                        if (cell.columnIndex > 0) {
-                            val key = firstRow.getCell(cell.columnIndex).stringCellValue
-                            when (cell.cellTypeEnum) {
-                                STRING -> cells[key] = cell.stringCellValue
-                                NUMERIC -> cells[key] = cell.numericCellValue.toString()
-                                else -> {
-                                    cells[key] = ""
-                                }
-                            }
-                        }
-                    }
-                    table[rowIndex - 1] = (cells)
+            } else {
+                val curLine = line - 1
+                if (!table.containsKey(curLine)) table[curLine] = mutableMapOf()
+                it.split("\\s+".toRegex()).forEachIndexed { index, s ->
+                    table[curLine]!![tokens[index]] = if (s == "E") "" else s
                 }
             }
+            line++
         }
         return table
     }
 
-}
-
-private fun List<String>.containsEPS(): Boolean {
-    return this.size <= 2
 }
 
 
