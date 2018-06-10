@@ -1,0 +1,58 @@
+Program $
+INCR int void if while return NUM ; ID { } (
+DeclarationList EOF int void
+Declaration EOF int void
+VarDeclaration EOF int void if while return NUM ; ID { } (
+FunDeclaration EOF int void
+SID ;
+SSID [
+SIZE_IS NUM
+FunReturnType (
+FUN_IN int void
+Params )
+LocalDeclarations int if while return NUM ; ID { } (
+StatementList if while return NUM ; ID { } (
+DECR }
+FUN_OUT EOF int void
+FID (
+ParamList , )
+Param , )
+PARAMID , [ )
+CompoundStmt if else while return NUM ; ID { } (
+Statement if else while return NUM ; ID { } (
+ExpressionStmt if else while return NUM ; ID { } (
+SelectionStmt if else while return NUM ; ID { } (
+IterationStmt if else while return NUM ; ID { } (
+ReturnStmt if else while return NUM ; ID { } (
+Args )
+JP if else while return NUM ; ID { } (
+RETURN ;
+PIDA [
+MULT , < * + - == ; ] )
+Term , < * + - == ; ] )
+IDNUM NUM
+SAVE )
+JPF_SAVE if while return NUM ; ID { (
+SEEARG , NUM ID (
+GOBACKN ;
+GOBACK ;
+ASSIGN , ; ] )
+PID , < * + - = == ; ] )
+EQ , ; ] )
+Call , < * + - == ; ] )
+LT , ; ] )
+WHILE if else while return NUM ; ID { } (
+AdditiveExpression , < + - == ; ] )
+Expression , ; ] )
+CID (
+CALL , < * + - == ; ] )
+ArgList , )
+LABEL NUM ID (
+ADD_ARG , )
+Var , < * + - = == ; ] )
+JPF
+SimpleExpression , ; ] )
+ARRPID , < * + - = == ; ] )
+Factor , < * + - == ; ] )
+SUB , < + - == ; ] )
+ADD , < + - == ; ] )

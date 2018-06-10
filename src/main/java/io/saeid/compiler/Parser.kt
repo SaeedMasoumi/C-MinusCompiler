@@ -11,7 +11,9 @@ import io.saeid.compiler.SymbolType.ANY
  * @author Saeed Masoumi (s-masoumi@live.com)
  */
 class Parser(rawTokens: List<Symbol>,
-        private val table: Table, private val rules: List<Rule>) {
+        private val table: Table,
+        private val rules: List<Rule>,
+        private val follow: Map<String, List<String>>) {
 
     private val stack = mutableListOf<String>()
     private val tokens: List<Symbol>
@@ -31,14 +33,16 @@ class Parser(rawTokens: List<Symbol>,
     fun parse(): List<Reduce> {
         log("Start parsing........")
         while (cursor < tokens.size) {
-            log("Stack: $stack")
-            tokens[cursor].let {
-                when (action(it)) {
-                    ACCEPT -> return reduces
-                    SHIFT -> shift(it)
-                    REDUCE -> reduce(it)
-                    ERROR->{
-                        handleError(it)
+            tokens[cursor].let { token ->
+                action(token).let { action ->
+                    println("Action for ${token.typeToTableName()} is $action")
+                    when (action) {
+                        ACCEPT -> return reduces
+                        SHIFT -> shift(token)
+                        REDUCE -> reduce(token)
+                        ERROR -> {
+                            handleError(token)
+                        }
                     }
                 }
             }
@@ -47,12 +51,53 @@ class Parser(rawTokens: List<Symbol>,
     }
 
     private fun handleError(token: Symbol) {
+        var popFromStack = true
+        if (take(token).isEmpty()) {
+            while (popFromStack) {
+                try {
+                    val top = stack.last()
+                    val gotoIndex = top.toDouble().toInt()
+                    popFromStack = true
+                    var dontContinue = false
+                    table[gotoIndex]?.forEach { term, cell ->
+                        if (!dontContinue)
+                            try {
+                                val gotoNumber = cell.toDouble().toInt()
+                                popFromStack = false
+                                stack.add(term)
+                                stack.add(gotoNumber.toString())
+                                val prevTop = stack[stack.size - 2]
+
+                                if (!follow[prevTop]!!.contains(token.typeToTableName())) {
+                                    cursor++
+                                } else {
+                                    Logger.error("Excepted $prevTop ")
+                                    dontContinue = true
+                                }
+                            } catch (e: Exception) {
+
+                            }
+                    }
+
+                    if (popFromStack) {
+                        val cur = stack.size - 1
+                        stack.removeAt(cur)
+                        stack.removeAt(cur - 1)
+                    }
+                } catch (e: Exception) {
+                }
+            }
+
+        }
     }
 
     private fun action(token: Symbol): Action {
         val cell = take(token)
         when {
-            cell == "acc" -> return ACCEPT
+            cell == "acc" -> {
+                log("Parser accepted the code")
+                return ACCEPT
+            }
             cell.startsWith("s") -> return SHIFT
             cell.startsWith("r") -> return REDUCE
         }

@@ -9,13 +9,29 @@ object SLRTable {
 
     private lateinit var rule: List<Rule>
     private lateinit var table: Table
+    private lateinit var f: Map<String, List<String>>
+
+    fun follow(path: File): Map<String, List<String>> {
+        if (!::f.isInitialized) {
+            val followTable = mutableMapOf<String, MutableList<String>>()
+            path.readLines().forEach {
+                val line = it.split("\\s+".toRegex())
+                val follows = arrayListOf<String>()
+                line.forEachIndexed { index, s ->
+                    if (index > 0)
+                        follows.add(s)
+                }
+                followTable[line[0]] = follows
+
+            }
+            f = followTable
+        }
+        return f
+    }
 
     fun rules(path: File): List<Rule> {
         if (!::rule.isInitialized)
             rule = extractRules(getRawRules(path))
-        rule.forEachIndexed {i,s->
-            println("[${i+1}] ${s.left}->${s.right}")
-        }
         return rule
     }
 

@@ -153,6 +153,29 @@ fun changeGrammar(lex: String, grammar: String) {
         sb.append("\n")
     }
     Files.write(file, sb.toString().toByteArray())
+
+    val followOutput = StringBuilder()
+    File("generated-follow").forEachLine {
+        val follow = it.split("\\s+".toRegex())
+        val newNonTerminal = follow[0]
+        noneTerminalMap.forEach { old, new ->
+            if (newNonTerminal == new) {
+                followOutput.append(old).append(" ")
+            }
+        }
+        if (follow.size > 1)
+            follow[1].split("").forEach { newTerminal ->
+                if (newTerminal == "$")
+                    followOutput.append(newTerminal).append(" ")
+                terminalMap.forEach { old, new ->
+                    if (newTerminal == new) {
+                        followOutput.append(old).append(" ")
+                    }
+                }
+            }
+        followOutput.append("\n")
+    }
+    Files.write(Paths.get("follow.txt"), followOutput.toString().toByteArray())
 }
 
 private fun makeSLRTable(path: String) {

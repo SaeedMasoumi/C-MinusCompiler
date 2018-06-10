@@ -12,4 +12,8 @@ object Logger {
         if (debug)
             println(msg)
     }
+
+    fun error(msg: String) {
+        println("ERROR:     $msg")
+    }
 }

@@ -9,7 +9,8 @@ fun main(args: Array<String>) {
     val tokens = lexer.tokenize()
     val rules = SLRTable.rules(language.grammar())
     val table = SLRTable.slr(language.table())
-    val parser = Parser(tokens, table, rules)
+    val follow = SLRTable.follow(language.follow())
+    val parser = Parser(tokens, table, rules, follow)
     val reduces = parser.parse()
     reduces.forEach {
         it.apply { println("${old.name} ${prev.name} ${cur.name}") }
@@ -21,6 +22,7 @@ typealias Language = String
 fun Language.lex() = File("$this.lex")
 fun Language.grammar() = File("$this.grammar")
 fun Language.table() = File("$this.table")
+fun Language.follow() = File("$this.follow")
 
 fun File.toProgramString(): String {
     return readLines().joinToString(separator = "\n")
