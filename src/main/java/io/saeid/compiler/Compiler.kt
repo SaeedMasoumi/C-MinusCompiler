@@ -4,7 +4,7 @@ import java.io.File
 
 fun main(args: Array<String>) {
     val language = "data/n1"
-    val program = File("prog3.txt").toProgramString()
+    val program = File("prog4.txt").toProgramString()
     val lexer = Lexer(language.lex(), normalize(program))
     val tokens = lexer.tokenize()
     val rules = SLRTable.rules(language.grammar())
@@ -12,9 +12,8 @@ fun main(args: Array<String>) {
     val follow = SLRTable.follow(language.follow())
     val parser = Parser(tokens, table, rules, follow)
     val reduces = parser.parse()
-    reduces.forEach {
-        it.apply { println("${old.name} ${prev.name} ${cur.name}") }
-    }
+    val codeGenerator = CodeGenerator(reduces)
+    codeGenerator.generator()
 }
 
 typealias Language = String

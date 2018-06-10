@@ -1,10 +1,11 @@
 int foo(int a){
 return a;
 }
-void main(void){
+int a[3];
+void main(int a[]){
     int a;
     int b;
-    if(){
+    if(a<b){
       b = assign(a);
     }else {
 

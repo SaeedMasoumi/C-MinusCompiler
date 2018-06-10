@@ -67,7 +67,6 @@ class Parser(rawTokens: List<Symbol>,
                                 stack.add(term)
                                 stack.add(gotoNumber.toString())
                                 val prevTop = stack[stack.size - 2]
-
                                 if (!follow[prevTop]!!.contains(token.typeToTableName())) {
                                     cursor++
                                 } else {
