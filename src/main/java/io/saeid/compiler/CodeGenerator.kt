@@ -15,7 +15,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
     private var ss = mutableListOf<String>()
     private val pb: MutableMap<Address, String> by lazy {
         val a = mutableMapOf<Address, String>()
-        for (i in 0 until 200)
+        for (i in 0 until 100)
             a[i] = ""
         return@lazy a
     }
