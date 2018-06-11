@@ -41,7 +41,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
 
     fun generator() {
         reduces.forEach { reduce ->
-            println(reduce)
+            println(reduce.rule.left)
             when (reduce.rule.left) {
                 "FID" -> fid(reduce)
                 "INCR" -> increase(reduce)
@@ -49,15 +49,17 @@ class CodeGenerator(private val reduces: List<Reduce>) {
                 "PARAMID" -> paramid(reduce)
                 "FUN_IN" -> funin(reduce)
                 "PID" -> pid(reduce)
-//                "SIZE_IS" -> sizeis(reduce)
+                "PIDA" -> pida(reduce)
+                "SIZE_IS" -> sizeis(reduce)
                 "ASSIGN" -> assign(reduce)
                 "ADD" -> add(reduce)
                 "SUB" -> sub(reduce)
                 "MULT" -> mult(reduce)
                 "EQ" -> eq(reduce)
                 "LT" -> lt(reduce)
-//                "SID" -> sid(reduce)
-//                "SSID" -> ssid(reduce)
+                "SID" -> sid(reduce)
+                "SSID" -> ssid(reduce)
+                "FUN_OUT" -> funout(reduce)
 //                "LABEL" -> label(reduce)
             }
         }
@@ -72,6 +74,10 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         }
     }
 
+    private fun funout(reduce: Reduce) {
+        val callbackaddr = symbolTable.get(currentFunction)?.callbackAddress
+        pb[i] = "(JP, @$callbackaddr)"
+    }
 
     private fun decrease(reduce: Reduce) {
         symbolTable.decrease()
@@ -79,6 +85,20 @@ class CodeGenerator(private val reduces: List<Reduce>) {
 
     private fun pid(reduce: Reduce) {
         val varName = reduce.prev.name
+        val item = symbolTable.get(varName)
+        var isError = false
+        if (item == null) {
+            Logger.error("$varName is not defined")
+            isError = true
+        } else if (!item.isVariable) {
+            isError = true
+            Logger.error("$varName is not variable")
+        } else isArray = !item.isInt
+        val address = if (isError) 0 else item!!.address
+        ss.add(address.toString())
+    }
+
+    private fun pida(reduce: Reduce) {
     }
 
     private fun funin(reduce: Reduce) {
@@ -145,16 +165,39 @@ class CodeGenerator(private val reduces: List<Reduce>) {
 
     private fun MutableList<String>.pop2() {
         this.removeAt(this.size - 1)
-        this.removeAt(this.size - 2)
+        this.removeAt(this.size - 1)
     }
 
     private fun label(reduce: Reduce) {
     }
 
     private fun sid(reduce: Reduce) {
+        val nextAddr = nextTemp()
+        val token = reduce.prev
+        symbolTable.insert(token, Item(isVariable = true, isInt = true, address = nextAddr))
+        ss.add(token.name)
+    }
+
+    private fun ssid(reduce: Reduce) {
+        val nextAddr = nextTemp()
+        val token = reduce.prev
+        val args = mutableListOf<String>()
+        if (reduce.cur.name == "[")
+            args.add("array")
+        symbolTable.insert(token, Item(isVariable = true, isInt = true, address = nextAddr,args = args))
+        ss.add(token.name)
     }
 
     private fun sizeis(reduce: Reduce) {
+        val token = reduce.cur
+        val arraySize = token.name.toInt()
+        symbolTable.getLast().lookup(ss.last())?.size = arraySize
+        if (arraySize < 0) {
+            Logger.error("Array length can't be negative [$arraySize]")
+        } else {
+            for (i in 0 until arraySize - 1)
+                nextDataAddress()
+        }
     }
 
     private fun paramid(reduce: Reduce) {
@@ -165,13 +208,12 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         val addr = nextTemp()
         val functionSymbolItem = symbolTable.get(currentFunction)
         if (isArray)
-            functionSymbolItem.args.add("array")
+            functionSymbolItem?.args?.add("array")
         else
-            functionSymbolItem.args.add("int")
+            functionSymbolItem?.args?.add("int")
         symbolTable.insert(token, Item(
                 address = addr, isVariable = true, isInt = !isArray, isReference = true
         ))
-
     }
 
     private fun increase(reduce: Reduce) {
@@ -185,9 +227,11 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         currentFunction = funcName
         val add1 = nextTemp()
         val add2 = nextTemp()
+        val dataAddress = nextDataAddress()
         val isVoid = funcType != "int"
         symbolTable.insert(token,
-                Item(isVoid = isVoid, isInt = !isVoid, callbackAddress = add1, returnAddress = add2,
+                Item(isVoid = isVoid, isInt = !isVoid, callbackAddress = dataAddress,
+                        returnAddress = add2,
                         inputAddress = add2 + 4))
         if (funcName == "main")
             pb[0] = "(JP, $i)"

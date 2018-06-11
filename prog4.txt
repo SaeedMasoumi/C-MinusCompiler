@@ -1,10 +1,8 @@
-int assign(int a){
-return a;
-}
-int assignArray(int b[]){
-return b[0]
-}
+int b[3];
 void main(void){
-    int c;
-    c=3;
-}EOF
+  int c[3];
+  int a;
+  a= 3;
+  c = 3;
+}
+EOF

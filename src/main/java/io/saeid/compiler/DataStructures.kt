@@ -39,7 +39,7 @@ data class Item(var isVoid: Boolean = false, val isInt: Boolean = false,
         var isVariable:Boolean = false,
         var isReference:Boolean = false,
         var returnAddress: Int = 0, var callbackAddress: Int = 0, var inputAddress: Int = 0,
-        var args: MutableList<String> = mutableListOf())
+        var args: MutableList<String> = mutableListOf(), var size: Int = 0)
 
 data class Scope(private val map: MutableMap<String, Item> = mutableMapOf()) {
     fun insert(token: String, item: Item) {
@@ -75,7 +75,9 @@ data class SymbolTable(private val scopes: MutableList<Scope> = mutableListOf())
         scopes.removeAt(scopes.size - 1)
     }
 
-    fun get(token: String): Item {
+    fun getLast() = scopes.last()
+    
+    fun get(token: String): Item? {
         var item: Item? = null
         scopes.forEach {
             if (item == null)
@@ -84,6 +86,6 @@ data class SymbolTable(private val scopes: MutableList<Scope> = mutableListOf())
         if (item == null) {
             Logger.log("$token is not declared")
         }
-        return item!!
+        return item
     }
 }
