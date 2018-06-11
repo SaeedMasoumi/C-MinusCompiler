@@ -49,8 +49,8 @@ Factor -> IDNUM NUM
 Call              -> ID CALLID ( Args ) CALL
 Args              -> ArgList
 Args ->  EPS
-ArgList           -> ArgList SEEARG , Expression ADD_ARG
-ArgList  -> SEEARG Expression ADD_ARG
+ArgList           -> ArgList SEEARG , Expression INSARG
+ArgList  -> SEEARG Expression INSARG
 PID               ->  EPS
 PREVIDAR              ->  EPS
 ARRPID            -> EPS
@@ -75,7 +75,7 @@ FUN_OUT             -> EPS
 FID               -> EPS
 PARAMID             -> EPS
 CALLID               -> EPS
-ADD_ARG           -> EPS
+INSARG           -> EPS
 CALL              -> EPS
 GOLOOP           -> EPS
 LOOP            -> EPS

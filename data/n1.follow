@@ -48,7 +48,7 @@ CALLID (
 CALL , < * + - == ; ] )
 ArgList , )
 LABEL NUM ID (
-ADD_ARG , )
+INSARG , )
 Var , < * + - = == ; ] )
 JPF
 SimpleExpression , ; ] )
