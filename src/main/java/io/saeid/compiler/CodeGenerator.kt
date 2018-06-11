@@ -198,6 +198,10 @@ class CodeGenerator(private val reduces: List<Reduce>) {
     private fun sid(reduce: Reduce) {
         val nextAddr = nextDataAddress()
         val token = reduce.prev
+        val item = symbolTable.get(token.name)
+        if (item != null) {
+            Logger.error("${token.name} is already defined")
+        }
         symbolTable.insert(token, Item(isVariable = true, isInt = true, address = nextAddr))
         ss.add(token.name)
     }
@@ -205,6 +209,10 @@ class CodeGenerator(private val reduces: List<Reduce>) {
     private fun sizeArrID(reduce: Reduce) {
         val nextAddr = nextDataAddress()
         val token = reduce.prev
+        val item = symbolTable.get(token.name)
+        if (item != null) {
+            Logger.error("${token.name} is already defined")
+        }
         val args = mutableListOf<String>()
         if (reduce.cur.name == "[")
             args.add("array")
