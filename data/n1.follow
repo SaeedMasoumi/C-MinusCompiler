@@ -5,9 +5,9 @@ Declaration EOF int void
 VarDeclaration EOF int void if while return NUM ; ID { } (
 FunDeclaration EOF int void
 SID ;
-SSID [
+SIZEARRID [
 SIZE_IS NUM
-FunReturnType (
+EasyFunError (
 FUN_IN int void
 Params )
 LocalDeclarations int if while return NUM ; ID { } (
@@ -27,15 +27,15 @@ ReturnStmt if else while return NUM ; ID { } (
 Args )
 JP if else while return NUM ; ID { } (
 RETURN ;
-PIDA [
+PREVIDAR [
 MULT , < * + - == ; ] )
 Term , < * + - == ; ] )
 IDNUM NUM
 SAVE )
 JPF_SAVE if while return NUM ; ID { (
 SEEARG , NUM ID (
-GOBACKN ;
-GOBACK ;
+GOLOOP ;
+LOOP ;
 ASSIGN , ; ] )
 PID , < * + - = == ; ] )
 EQ , ; ] )
@@ -44,7 +44,7 @@ LT , ; ] )
 WHILE if else while return NUM ; ID { } (
 AdditiveExpression , < + - == ; ] )
 Expression , ; ] )
-CID (
+CALLID (
 CALL , < * + - == ; ] )
 ArgList , )
 LABEL NUM ID (

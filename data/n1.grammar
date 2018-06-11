@@ -4,10 +4,10 @@ DeclarationList -> Declaration
 Declaration       -> VarDeclaration
 Declaration -> FunDeclaration
 VarDeclaration    -> int ID SID ;
-VarDeclaration -> int ID SSID [ SIZE_IS NUM ] ;
-FunDeclaration    -> FunReturnType ( INCR FUN_IN Params ) { LocalDeclarations StatementList DECR } FUN_OUT
-FunReturnType     -> int ID FID
-FunReturnType  -> void ID FID
+VarDeclaration -> int ID SIZEARRID [ SIZE_IS NUM ] ;
+FunDeclaration    -> EasyFunError ( INCR FUN_IN Params ) { LocalDeclarations StatementList DECR } FUN_OUT
+EasyFunError     -> int ID FID
+EasyFunError  -> void ID FID
 Params            -> ParamList
 Params  ->  void
 ParamList         ->  ParamList , Param
@@ -28,12 +28,12 @@ ExpressionStmt    ->  Expression ;
 ExpressionStmt  -> ;
 SelectionStmt     -> if ( Expression SAVE ) Statement else JPF_SAVE Statement JP
 IterationStmt     -> while ( LABEL Expression SAVE ) Statement WHILE
-ReturnStmt        ->  return GOBACKN ;
-ReturnStmt  ->  return Expression RETURN GOBACK ;
+ReturnStmt        ->  return GOLOOP ;
+ReturnStmt  ->  return Expression RETURN LOOP ;
 Expression        ->  Var = Expression ASSIGN
 Expression  ->  SimpleExpression
 Var               -> ID PID
-Var  -> ID PIDA [ Expression ] ARRPID
+Var  -> ID PREVIDAR [ Expression ] ARRPID
 SimpleExpression   -> AdditiveExpression == AdditiveExpression EQ
 SimpleExpression  -> AdditiveExpression < AdditiveExpression LT
 SimpleExpression  -> AdditiveExpression
@@ -46,17 +46,17 @@ Factor            ->  ( Expression )
 Factor -> Var
 Factor -> Call
 Factor -> IDNUM NUM
-Call              -> ID CID ( Args ) CALL
+Call              -> ID CALLID ( Args ) CALL
 Args              -> ArgList
 Args ->  EPS
 ArgList           -> ArgList SEEARG , Expression ADD_ARG
 ArgList  -> SEEARG Expression ADD_ARG
 PID               ->  EPS
-PIDA              ->  EPS
+PREVIDAR              ->  EPS
 ARRPID            -> EPS
 ASSIGN            ->  EPS
 SID               -> EPS
-SSID              -> EPS
+SIZEARRID              -> EPS
 SIZE_IS          -> EPS
 ADD               -> EPS
 SUB               -> EPS
@@ -74,11 +74,11 @@ FUN_IN             -> EPS
 FUN_OUT             -> EPS
 FID               -> EPS
 PARAMID             -> EPS
-CID               -> EPS
+CALLID               -> EPS
 ADD_ARG           -> EPS
 CALL              -> EPS
-GOBACKN           -> EPS
-GOBACK            -> EPS
+GOLOOP           -> EPS
+LOOP            -> EPS
 RETURN            -> EPS
 SEEARG         -> EPS
 INCR         ->  EPS

@@ -45,7 +45,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
                 "PARAMID" -> paramid(reduce)
                 "FUN_IN" -> funin(reduce)
                 "PID" -> pid(reduce)
-                "PIDA" -> pida(reduce)
+                "PREVIDAR" -> prevIdAr(reduce)
                 "SIZE_IS" -> sizeis(reduce)
                 "ASSIGN" -> assign(reduce)
                 "ADD" -> add(reduce)
@@ -54,7 +54,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
                 "EQ" -> eq(reduce)
                 "LT" -> lt(reduce)
                 "SID" -> sid(reduce)
-                "SSID" -> ssid(reduce)
+                "SIZEARRID" -> sizeArrID(reduce)
                 "FUN_OUT" -> funout(reduce)
                 "SAVE" -> save(reduce)
                 "JP" -> jp(reduce)
@@ -122,7 +122,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         ss.add(address.toString())
     }
 
-    private fun pida(reduce: Reduce) {
+    private fun prevIdAr(reduce: Reduce) {
     }
 
     private fun funin(reduce: Reduce) {
@@ -202,7 +202,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         ss.add(token.name)
     }
 
-    private fun ssid(reduce: Reduce) {
+    private fun sizeArrID(reduce: Reduce) {
         val nextAddr = nextTemp()
         val token = reduce.prev
         val args = mutableListOf<String>()
