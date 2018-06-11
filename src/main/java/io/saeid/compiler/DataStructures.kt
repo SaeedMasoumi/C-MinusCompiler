@@ -37,7 +37,6 @@ data class Reduce(val rule: Rule, val cur: Symbol, val prev: Symbol, val old: Sy
 data class Item(var isVoid: Boolean = false, val isInt: Boolean = false,
         var address: Int = 0,
         var isVariable:Boolean = false,
-        var isReference:Boolean = false,
         var returnAddress: Int = 0, var callbackAddress: Int = 0, var inputAddress: Int = 0,
         var args: MutableList<String> = mutableListOf(), var size: Int = 0)
 

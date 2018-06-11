@@ -253,8 +253,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         else
             functionSymbolItem?.args?.add("int")
         symbolTable.insert(token, Item(
-                address = addr, isVariable = true, isInt = !isArray, isReference = true
-        ))
+                address = addr, isVariable = true, isInt = !isArray))
     }
 
     private fun increase(reduce: Reduce) {
