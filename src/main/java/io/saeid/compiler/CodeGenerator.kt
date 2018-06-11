@@ -7,10 +7,6 @@ package io.saeid.compiler
 typealias Address = Int
 
 class CodeGenerator(private val reduces: List<Reduce>) {
-    companion object {
-        const val ARRAY = "array"
-        const val INT = "array"
-    }
 
     private val symbolTable = SymbolTable()
 
@@ -60,6 +56,9 @@ class CodeGenerator(private val reduces: List<Reduce>) {
                 "SID" -> sid(reduce)
                 "SSID" -> ssid(reduce)
                 "FUN_OUT" -> funout(reduce)
+                "SAVE" -> save(reduce)
+                "JP" -> jp(reduce)
+                "JPF_SAVE" -> jpf_save(reduce)
 //                "LABEL" -> label(reduce)
             }
         }
@@ -72,6 +71,31 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         ss.forEach {
             println(it)
         }
+    }
+
+    private fun jp(reduce: Reduce) {
+        try {
+            pb[ss.last().toInt()] = "(JPF, ${ss[ss.size - 2]}, $i)"
+            ss.pop2()
+        } catch (e: Exception) {
+            e.message?.let { Logger.log(it) }
+        }
+    }
+
+    private fun jpf_save(reduce: Reduce) {
+        try {
+            pb[ss.last().toInt()] = "(JPF, ${ss[ss.size - 2]}, ${i + 1})"
+            ss.pop2()
+            ss.add(i.toString())
+            i += 1
+        } catch (e: Exception) {
+            e.message?.let { Logger.log(it) }
+        }
+    }
+
+    private fun save(reduce: Reduce) {
+        ss.add(i.toString())
+        i++
     }
 
     private fun funout(reduce: Reduce) {
