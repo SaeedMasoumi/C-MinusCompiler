@@ -59,6 +59,7 @@ class CodeGenerator(private val reduces: List<Reduce>) {
                 "SAVE" -> save(reduce)
                 "JP" -> jp(reduce)
                 "JPF_SAVE" -> jpf_save(reduce)
+                "LOOP" -> loop(reduce)
 //                "LABEL" -> label(reduce)
             }
         }
@@ -70,6 +71,14 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         println("--")
         ss.forEach {
             println(it)
+        }
+    }
+
+    private fun loop(reduce: Reduce) {
+        symbolTable.get(currentFunction)?.let {
+            if (it.isVoid) {
+                Logger.error("Function $currentFunction is void but it return ${reduce.prev.name}")
+            }
         }
     }
 

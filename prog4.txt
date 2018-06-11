@@ -2,10 +2,12 @@ int assign(int a){
 return a;
 }
 void foo(void){
-return;
+return 1;
+}
+void bar(void){
+return ;
 }
 void main(void){
-  int a;
   int a;
   a=3;
   /*a = a+2;
