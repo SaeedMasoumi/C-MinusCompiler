@@ -196,14 +196,14 @@ class CodeGenerator(private val reduces: List<Reduce>) {
     }
 
     private fun sid(reduce: Reduce) {
-        val nextAddr = nextTemp()
+        val nextAddr = nextDataAddress()
         val token = reduce.prev
         symbolTable.insert(token, Item(isVariable = true, isInt = true, address = nextAddr))
         ss.add(token.name)
     }
 
     private fun sizeArrID(reduce: Reduce) {
-        val nextAddr = nextTemp()
+        val nextAddr = nextDataAddress()
         val token = reduce.prev
         val args = mutableListOf<String>()
         if (reduce.cur.name == "[")
@@ -249,7 +249,6 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         val funcName = reduce.prev.name
         val funcType = reduce.old.name
         currentFunction = funcName
-        val add1 = nextTemp()
         val add2 = nextTemp()
         val dataAddress = nextDataAddress()
         val isVoid = funcType != "int"
