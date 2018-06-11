@@ -34,57 +34,56 @@ data class Rule(val left: String, val right: List<String>)
 
 data class Reduce(val rule: Rule, val cur: Symbol, val prev: Symbol, val old: Symbol)
 
-data class SymbolScope(var address: Int, var isVar: Boolean = false,
-        var isInt: Boolean = false, var callbackAddress: Int = 0,
-        var returnAddress: Int = 0,
-        var inputAddress: Int = 0,
-        var size: Int = 0,
-        var arguments: MutableList<String> = mutableListOf(),
-        var isVoid: Boolean = false, val isReference: Boolean = false
-)
+data class Item(var isVoid: Boolean = false, val isInt: Boolean = false,
+        var address: Int = 0,
+        var isVariable:Boolean = false,
+        var isReference:Boolean = false,
+        var returnAddress: Int = 0, var callbackAddress: Int = 0, var inputAddress: Int = 0,
+        var args: MutableList<String> = mutableListOf())
 
-data class SymbolScopeTable(
-        private val symbols: MutableMap<String, SymbolScope> = mutableMapOf()) {
-    fun insert(token: Symbol, scope: SymbolScope) {
-        if (symbols.keys.contains(token.name))
-            Logger.error("multiple declaration of $token")
-        symbols[token.name] = scope
+data class Scope(private val map: MutableMap<String, Item> = mutableMapOf()) {
+    fun insert(token: String, item: Item) {
+        map[token] = item
     }
 
-    fun lookup(token: String) = symbols[token]
-    fun update(token: String, arguments: MutableList<String> = mutableListOf(), size: Int = -1) {
-        if (size != -1)
-            symbols[token]?.size = size
-        if (arguments.isNotEmpty()) {
-            symbols[token]?.arguments = arguments
+    fun print() {
+        map.forEach { t, s ->
+            println("$t : $s")
         }
     }
+
+    fun lookup(currentFunction: String) = map[currentFunction]
 
 }
 
-data class SymbolTable(val scopes: MutableList<SymbolScopeTable> = mutableListOf()) {
-    fun insert(token: Symbol, scope: SymbolScope) {
-        scopes.last().insert(token, scope)
-    }
-
+data class SymbolTable(private val scopes: MutableList<Scope> = mutableListOf()) {
     fun increase() {
-        scopes.add(SymbolScopeTable())
+        scopes.add(Scope())
     }
 
-    fun lookup(token: String): SymbolScope? {
-        var ss: SymbolScope? = null
-        scopes.reversed().forEach {
-            if (ss == null) {
-                ss = it.lookup(token)
-            }
-        }
-        if (ss == null) {
-            Logger.error("$token was not declared")
-        }
-        return ss
+    fun insert(token: Symbol, item: Item) {
+        scopes.last().insert(token.name, item)
     }
 
-    fun update(token: String, size: Int) {
-        scopes.last().update(token, size = size)
+    fun print() {
+        scopes.forEach {
+            it.print()
+        }
+    }
+
+    fun decrease() {
+        scopes.removeAt(scopes.size - 1)
+    }
+
+    fun get(token: String): Item {
+        var item: Item? = null
+        scopes.forEach {
+            if (item == null)
+                item = it.lookup(token)
+        }
+        if (item == null) {
+            Logger.log("$token is not declared")
+        }
+        return item!!
     }
 }

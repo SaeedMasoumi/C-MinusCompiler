@@ -14,8 +14,8 @@ class CodeGenerator(private val reduces: List<Reduce>) {
 
     private val symbolTable = SymbolTable()
 
-    private var errorNameSpace: String = ""
-    private var lastAddress = 200
+    private var lastAddress = 500
+    private var dataAddress = 100
     private var ss = mutableListOf<String>()
     private val pb: MutableMap<Address, String> by lazy {
         val a = mutableMapOf<Address, String>()
@@ -24,33 +24,44 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         return@lazy a
     }
     private var i = 0
-    private var isVoid = true
-    private var currentFunc = ""
+    private var currentFunction = ""
     private var isArray = false
     private var argsIsArray = false
     private var expIsArray = false
 
-    fun getTemp(): Int {
+    private fun nextTemp(): Int {
         lastAddress += 4
         return lastAddress - 4
     }
 
+    private fun nextDataAddress(): Int {
+        dataAddress += 4
+        return dataAddress - 4
+    }
+
     fun generator() {
         reduces.forEach { reduce ->
-            println(reduce.rule.left)
+            println(reduce)
             when (reduce.rule.left) {
                 "FID" -> fid(reduce)
                 "INCR" -> increase(reduce)
+                "DECR" -> decrease(reduce)
+                "PARAMID" -> paramid(reduce)
                 "FUN_IN" -> funin(reduce)
                 "PID" -> pid(reduce)
-//                "PARAMID" -> paramid(reduce)
 //                "SIZE_IS" -> sizeis(reduce)
-//                "ASSIGN" -> assign(reduce)
-                "SID" -> sid(reduce)
+                "ASSIGN" -> assign(reduce)
+                "ADD" -> add(reduce)
+                "SUB" -> sub(reduce)
+                "MULT" -> mult(reduce)
+                "EQ" -> eq(reduce)
+                "LT" -> lt(reduce)
+//                "SID" -> sid(reduce)
 //                "SSID" -> ssid(reduce)
-                "LABEL" -> label(reduce)
+//                "LABEL" -> label(reduce)
             }
         }
+        symbolTable.print()
         pb.forEach { t, u ->
             if (u.isNotEmpty())
                 println(u)
@@ -61,84 +72,106 @@ class CodeGenerator(private val reduces: List<Reduce>) {
         }
     }
 
+
+    private fun decrease(reduce: Reduce) {
+        symbolTable.decrease()
+    }
+
     private fun pid(reduce: Reduce) {
-        val token = reduce.prev
-        val attrs = symbolTable.lookup(token.name)
-        isArray = false
-        var addr = 0
-//        if (attrs == null) {
-//            addr = 0
-//        } else if (!attrs.isVar) {
-//            Logger.error("$token is not a variable")
-//            addr = 0
-//        } else {
-//            addr = attrs.address
-//            if (!attrs.isInt)
-//                isArray = true
-//            if (!argsIsArray) {
-//                Logger.error("$token is an array")
-//            }
-//        }
-//        expIsArray = isArray && !expIsArray
-        ss.add(addr.toString())
+        val varName = reduce.prev.name
     }
 
     private fun funin(reduce: Reduce) {
-        errorNameSpace = currentFunc
+        //no-op
     }
 
-    private fun ssid(reduce: Reduce) {
-        val prev = reduce.prev
-        symbolTable.insert(prev, SymbolScope(address = getTemp(), isVar = true, isInt = false))
-        ss.add(prev.name)
+    private fun add(reduce: Reduce) {
+        if (ss.size > 1) {
+            val nextTemp = nextTemp()
+            pb[i] = "(ADD, ${ss[ss.size - 1]}, ${ss[ss.size - 2]}, $nextTemp"
+            ss.pop2()
+            ss.add(nextTemp.toString())
+            i++
+        }
+    }
+
+    private fun sub(reduce: Reduce) {
+        if (ss.size > 1) {
+            val nextTemp = nextTemp()
+            pb[i] = "(SUB, ${ss[ss.size - 1]}, ${ss[ss.size - 2]}, $nextTemp"
+            ss.pop2()
+            ss.add(nextTemp.toString())
+            i++
+        }
+    }
+
+    private fun mult(reduce: Reduce) {
+        if (ss.size > 1) {
+            val nextTemp = nextTemp()
+            pb[i] = "(MULT, ${ss[ss.size - 1]}, ${ss[ss.size - 2]}, $nextTemp"
+            ss.pop2()
+            ss.add(nextTemp.toString())
+            i++
+        }
+    }
+
+    private fun eq(reduce: Reduce) {
+        if (ss.size > 1) {
+            val nextTemp = nextTemp()
+            pb[i] = "(EQ, ${ss[ss.size - 1]}, ${ss[ss.size - 2]}, $nextTemp"
+            ss.pop2()
+            ss.add(nextTemp.toString())
+            i++
+        }
+    }
+
+    private fun lt(reduce: Reduce) {
+        if (ss.size > 1) {
+            val nextTemp = nextTemp()
+            pb[i] = "(LT, ${ss[ss.size - 1]}, ${ss[ss.size - 2]}, $nextTemp"
+            ss.pop2()
+            ss.add(nextTemp.toString())
+            i++
+        }
     }
 
     private fun assign(reduce: Reduce) {
-        pb[i] = "(ASSIGN, ${ss.last()}, ${ss[ss.size - 2]})"
-        ss.removeAt(ss.size - 1)
-        ss.removeAt(ss.size - 1)
-        i += 1
+        if (ss.size > 1) {
+            pb[i] = "(ASSIGN, ${ss[ss.size - 1]}, ${ss[ss.size - 2]})"
+            ss.pop2()
+            i++
+        }
+    }
+
+    private fun MutableList<String>.pop2() {
+        this.removeAt(this.size - 1)
+        this.removeAt(this.size - 2)
     }
 
     private fun label(reduce: Reduce) {
-        ss.add(i.toString())
     }
 
     private fun sid(reduce: Reduce) {
-        symbolTable.insert(reduce.prev,
-                SymbolScope(address = getTemp(), isVar = true, isInt = true))
     }
 
     private fun sizeis(reduce: Reduce) {
-        val cur = reduce.cur
-        var size = cur.name.toInt()
-        if (size <= 0) {
-            Logger.error("length of arrays should be a positive integer")
-            size = 1
-        }
-        symbolTable.update(ss.last(), size)
-        ss.removeAt(ss.size - 1)
-        for (i in 0 until size - 1)
-            getTemp()
     }
 
     private fun paramid(reduce: Reduce) {
         val token = reduce.prev
-        val x = reduce.cur
-        isArray = false
-        if (x.name == "[")
-            isArray = true
-        val addr = getTemp()
-        symbolTable.insert(token, SymbolScope(address = addr, isVar = true, isInt = !isArray,
-                isReference = true))
-        val arguments = symbolTable.lookup(currentFunc)?.arguments
+        val type = reduce.old.name
+        val name = reduce.prev.name
+        val isArray = reduce.cur.name == "["
+        val addr = nextTemp()
+        val functionSymbolItem = symbolTable.get(currentFunction)
         if (isArray)
-            arguments?.add(ARRAY)
+            functionSymbolItem.args.add("array")
         else
-            arguments?.add(INT)
-        arguments?.let {
-            symbolTable.scopes[0].update(token = currentFunc, arguments = arguments)
-        }
+            functionSymbolItem.args.add("int")
+        symbolTable.insert(token, Item(
+                address = addr, isVariable = true, isInt = !isArray, isReference = true
+        ))
+
     }
 
     private fun increase(reduce: Reduce) {
@@ -146,16 +179,18 @@ class CodeGenerator(private val reduces: List<Reduce>) {
     }
 
     private fun fid(reduce: Reduce) {
-        val (_, _, token, old) = reduce
-        val add1 = getTemp()
-        val add2 = getTemp()
-        isVoid = old.typeToTableName() != "int"
-        currentFunc = token.name
+        val token = reduce.prev
+        val funcName = reduce.prev.name
+        val funcType = reduce.old.name
+        currentFunction = funcName
+        val add1 = nextTemp()
+        val add2 = nextTemp()
+        val isVoid = funcType != "int"
         symbolTable.insert(token,
-                SymbolScope(address = i, isVar = false, isInt = true, callbackAddress = add1,
-                        returnAddress = add2, inputAddress = add2 + 4,
-                        arguments = mutableListOf(), isVoid = isVoid, isReference = true))
-        if (currentFunc == "main")
+                Item(isVoid = isVoid, isInt = !isVoid, callbackAddress = add1, returnAddress = add2,
+                        inputAddress = add2 + 4))
+        if (funcName == "main")
             pb[0] = "(JP, $i)"
+
     }
 }
